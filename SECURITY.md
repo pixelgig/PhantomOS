@@ -7,3 +7,6 @@ Prefer the repository's GitHub Security > Report a vulnerability option if priva
 
 ## Security model
 The device currently relies on its private WPA2 access point; HTTP has no independent authentication or TLS. Do not expose the dashboard to the Internet or an untrusted network. Keep serial output and AP keys private. Initialize LittleFS only after backing up old data. Browser snapshots may contain nearby network names; redact reports before sharing. See docs/ARCHITECTURE.md for boundaries.
+
+## v0.3 station mode
+Optional upstream association increases exposure. Server binds to AP address and validates Host/destination; physical isolation tests are outstanding. Do not join untrusted upstream networks. Station credentials are sent via local HTTP inside WPA2 and used only for the current session; no application persistence. No independent app authentication or TLS. DNS is explicitly user-triggered and may reach the upstream resolver.

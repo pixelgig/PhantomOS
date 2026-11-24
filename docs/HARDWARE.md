@@ -14,3 +14,5 @@ No extra components are needed for the current Wi-Fi toolkit. The ESP8266 is a 2
 Use a reliable USB power supply. ESP8266 GPIO uses 3.3 V logic; do not connect 5 V signals directly. Disconnect power before wiring peripherals. Future hardware modules must document pin mapping, voltage, current, boot strap constraints and tested board revisions. Do not attach unknown electrical systems directly.
 
 Verify actual chip and flash size before installing. Backup old firmware/data if needed. Filesystem initialization replaces existing filesystem contents. See README for instructions and troubleshooting.
+
+Optional station mode uses the same 2.4 GHz radio as the AP; association or scanning may interrupt browser access. No additional hardware required; no simultaneous independent radio channels.

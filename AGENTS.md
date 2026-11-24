@@ -21,3 +21,8 @@ Read BRAIN.md before work. Keep hardware facts separate from assumptions. Never 
 - Added MIT license, public contribution and security policies, issue/PR templates, architecture, API, hardware, development, testing and release docs, roadmap, changelog and dashboard generator.
 - Public source is for everyone; temporary BRAIN.md and AGENTS.md must be removed before stable v1.0 after migration into public docs. Git history is retained.
 - Initial CI dashboard test passed; firmware compilation failed because the variadic header registration overload misinterpreted the array/count arguments. Changed to single-header overload; new CI result pending. Hardware remains untested.
+
+## 2026-11-24 — v0.3.0 — ChatGPT (GPT-6.2)
+- Verified v0.2 corrected GitHub build passed (45348786422).
+- Added optional station association, disconnect, DHCP telemetry, DNS check with timeout/cooldown, AP-bound HTTP server and Host/destination guard, subnet conflict rejection, dashboard/demo and automated assertions. No intentional station credential persistence, NAT, ping or speed test.
+- Updated public docs, roadmap, changelog, validation. v0.3 CI and physical tests pending. Next: hardware isolation/connection testing; v0.4 electronics toolkit.

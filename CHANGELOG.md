@@ -2,6 +2,12 @@
 
 Changes are recorded by version. Versions below 1.0 are development releases; interfaces may change.
 
+## 0.3.0 — 2026-11-24
+- Optional station join/disconnect, DHCP network details and on-demand DNS resolution.
+- AP-address binding and Host/destination checks, subnet overlap rejection, scan/join guard.
+- Network dashboard and demo tests, network toolkit documentation. No routing or ping.
+- Corrected v0.2 CI passed; v0.3 build pending at commit time.
+
 ## Unreleased
 - Public contribution, architecture, API, testing, hardware, security and release documentation.
 - MIT license for original project files; dependency licenses remain separate.

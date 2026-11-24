@@ -1,0 +1,9 @@
+# Network toolkit — v0.3 alpha
+
+The default is standalone and offline. Connect the phone to the private Phantom AP, then optionally join an authorized 2.4 GHz network using the Network toolkit panel. WPA passphrases are limited to 8–63 printable ASCII characters; blank selects an open network. Enterprise Wi-Fi and raw 64-character PSKs are not supported. The HTTP form sends credentials inside the private WPA2 link; no TLS or separate app authentication. Do not share the AP key or use untrusted clients. The SDK retains station credentials in RAM; firmware uses WiFi.persistent(false) and does not save them to LittleFS. This is not secure erasure of SDK memory or any credentials left by previous firmware.
+
+The station displays assigned IPv4, subnet, gateway, DNS, RSSI and channel. An overlapping upstream subnet causes disconnect. Connection attempts expire after 20 seconds (plus initial deferred start). The AP can change channel during station association; refresh after reconnecting if needed. Scan and join operations are mutually exclusive. Disconnect ends the session. The board does not enable NAT or route client traffic.
+
+DNS check: explicit single lookup of example.com, 1.5-second SDK timeout, 10-second cooldown. The result can come from cache; it does not demonstrate external connectivity, gateway response or Internet speed. No ping or external HTTP probes. No automatic external requests. A DNS query may leave the local network through the chosen resolver.
+
+The HTTP server binds to 192.168.4.1 and checks destination and Host header. This limits normal station access but is not a fully validated firewall; physical tests must verify requests to station IP and routed AP IP are blocked or appropriately isolated. Avoid untrusted upstream networks. Disconnect upstream if concerned. See docs/API.md and docs/TESTING.md.

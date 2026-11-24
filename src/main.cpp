@@ -6,10 +6,11 @@
 #include "dashboard.h"
 
 namespace {
-constexpr char VERSION[] = "0.2.0";
+constexpr char VERSION[] = "0.3.0";
 constexpr uint8_t MAX_NETWORKS = 32;
 constexpr unsigned long SCAN_COOLDOWN = 15000;
-ESP8266WebServer server(80);
+const IPAddress AP_IP(192,168,4,1);
+ESP8266WebServer server(AP_IP,80);
 String apName, apPassword;
 bool fsReady = false;
 bool scanning = false;
@@ -25,6 +26,11 @@ unsigned long lastHeapSample = 0;
 constexpr unsigned long SCAN_TIMEOUT = 30000;
 bool serverReady = false;
 String cachedNetworks = "[]";
+String pendingSsid, pendingKey;
+bool joinQueued=false, joining=false;
+unsigned long joinAt=0, lastDnsAt=0;
+bool dnsAttempted=false;
+String linkState="disconnected";
 
 String jsonString(const String& input) {
   String out; out.reserve(input.length() + 10); out += '"';
@@ -81,6 +87,93 @@ void sendJson(int code, const String& body) {
   server.sendHeader("X-Content-Type-Options", "nosniff");
   server.send(code, "application/json", body);
 }
+// The server is bound to the AP address; verify destination and host again.
+bool apRequest() {
+  String host=server.hostHeader();
+  if(server.client().localIP()!=AP_IP || (host!="192.168.4.1" && host!="192.168.4.1:80")) {
+    sendJson(403,F("{\"error\":\"Use the private Phantom AP address\"}")); return false;
+  }
+  return true;
+}
+bool command(const char* name) {
+  if(!apRequest()) return false;
+  if(server.header("X-Phantom-Request")!=name) {
+    sendJson(403,F("{\"error\":\"Request header required\"}")); return false;
+  }
+  return true;
+}
+bool connected() { return !joining && !joinQueued && linkState=="connected" && WiFi.status()==WL_CONNECTED; }
+void clearJoin() {
+  // SDK also holds current station credentials in RAM; persistent(false) is set at boot.
+  pendingKey=""; pendingSsid="";
+}
+void stopLink(const char* state) {
+  WiFi.disconnect(false); clearJoin(); joining=false; joinQueued=false; linkState=state;
+}
+bool overlappingSubnet() {
+  uint32_t ip=uint32_t(WiFi.localIP()), mask=uint32_t(WiFi.subnetMask()), ap=uint32_t(AP_IP);
+  uint32_t apMask=uint32_t(IPAddress(255,255,255,0));
+  return mask==0 || (ip & mask)==(ap & mask) || (ip & apMask)==(ap & apMask);
+}
+void updateLink() {
+  if(joinQueued) {
+    if(millis()-joinAt<250) return;
+    joinQueued=false; joining=true; joinAt=millis();
+    WiFi.begin(pendingSsid.c_str(), pendingKey.length()?pendingKey.c_str():nullptr);
+    clearJoin(); return;
+  }
+  if(joining) {
+    if(WiFi.status()==WL_CONNECTED) {
+      if(overlappingSubnet()) { stopLink("subnet_conflict"); return; }
+      joining=false; linkState="connected";
+    } else if(millis()-joinAt>=20000) stopLink("timeout");
+  } else if(linkState=="connected" && WiFi.status()!=WL_CONNECTED) stopLink("lost");
+}
+void handleLinkStatus() {
+  if(!apRequest())return;
+  String s=F("{\"state\":"); s+=jsonString(linkState);
+  s+=F(",\"connected\":");s+=connected()?"true":"false";
+  if(connected()) {
+    s+=F(",\"ssid\":");s+=jsonString(WiFi.SSID());
+    s+=F(",\"ip\":");s+=jsonString(WiFi.localIP().toString());
+    s+=F(",\"gateway\":");s+=jsonString(WiFi.gatewayIP().toString());
+    s+=F(",\"subnet\":");s+=jsonString(WiFi.subnetMask().toString());
+    s+=F(",\"dns\":");s+=jsonString(WiFi.dnsIP(0).toString());
+    s+=F(",\"rssi\":");s+=WiFi.RSSI();
+    s+=F(",\"channel\":");s+=WiFi.channel();
+  }
+  s+='}';sendJson(200,s);
+}
+void handleJoin() {
+  if(!command("join"))return;
+  if(scanning||joining||joinQueued||connected()) {sendJson(409,F("{\"error\":\"Finish scan or disconnect first\"}"));return;}
+  if(ESP.getFreeHeap()<14000) {sendJson(503,F("{\"error\":\"Insufficient free memory\"}"));return;}
+  String ssid=server.arg("ssid"), key=server.arg("password");
+  if(ssid.length()<1||ssid.length()>32||(key.length()!=0&&(key.length()<8||key.length()>63))) {
+    sendJson(400,F("{\"error\":\"SSID 1–32 bytes; password 8–63 bytes or empty for an open network\"}"));return;
+  }
+  for(unsigned i=0;i<ssid.length();++i) if(ssid[i]==0) {sendJson(400,F("{\"error\":\"Invalid SSID\"}"));return;}
+  for(unsigned i=0;i<key.length();++i) if(key[i]<32||key[i]>126) {sendJson(400,F("{\"error\":\"Use an ASCII WPA passphrase\"}"));return;}
+  pendingSsid=ssid;pendingKey=key;joinQueued=true;joinAt=millis();linkState="connecting";
+  sendJson(202,F("{\"state\":\"connecting\"}"));
+}
+void handleLeave() {
+  if(!command("leave"))return;
+  if(scanning) {sendJson(409,F("{\"error\":\"Wait for scan to finish\"}"));return;}
+  stopLink("disconnected");sendJson(200,F("{\"state\":\"disconnected\"}"));
+}
+void handleDns() {
+  if(!command("dns"))return;
+  if(!connected()||scanning) {sendJson(409,F("{\"error\":\"Join your network and wait for scans to finish\"}"));return;}
+  if(dnsAttempted&&millis()-lastDnsAt<10000) {sendJson(429,F("{\"error\":\"Wait 10 seconds between DNS checks\"}"));return;}
+  dnsAttempted=true;lastDnsAt=millis();
+  IPAddress result;unsigned long start=millis();
+  bool ok=WiFi.hostByName("example.com",result,1500)==1;
+  String s=F("{\"hostname\":\"example.com\",\"resolved\":");s+=ok?"true":"false";
+  s+=F(",\"elapsedMs\":");s+=millis()-start;
+  s+=F(",\"address\":");if(ok)s+=jsonString(result.toString());else s+="null";
+  s+='}';sendJson(200,s);
+}
 const char* encryption(uint8_t value) {
   switch (value) {
     case ENC_TYPE_NONE: return "Open";
@@ -128,6 +221,7 @@ void updateScan() {
   cachedNetworks = std::move(result); hasResult = true; scanFailed = false;
 }
 void handleStatus() {
+  if(!apRequest())return;
   String s; s.reserve(350);
   s += F("{\"version\":\""); s += VERSION;
   s += F("\",\"board\":\"ESP8266\",\"cpuMHz\":"); s += ESP.getCpuFreqMHz();
@@ -147,7 +241,8 @@ void handleStatus() {
 }
 void handleScanStart() {
   // Non-simple header prevents cross-origin browser requests from starting scans.
-  if (server.header("X-Phantom-Request") != "scan") { sendJson(403, F("{\"error\":\"Request header required\"}")); return; }
+  if (!command("scan")) return;
+  if (joining||joinQueued) { sendJson(409,F("{\"error\":\"Wait for connection attempt\"}")); return; }
   if (scanning) { sendJson(202, F("{\"state\":\"scanning\"}")); return; }
   if ((hasResult || scanFailed) && millis()-scanStarted < SCAN_COOLDOWN) {
     sendJson(429, F("{\"error\":\"Wait 15 seconds between scans\"}")); return;
@@ -158,6 +253,7 @@ void handleScanStart() {
   sendJson(202, F("{\"state\":\"scanning\"}"));
 }
 void handleScanResults() {
+  if(!apRequest())return;
   String s; s.reserve(cachedNetworks.length() + 140);
   s += F("{\"state\":\""); s += scanFailed ? "error" : scanning ? "scanning" : hasResult ? "ready" : "idle";
   s += F("\",\"total\":"); s += totalFound;
@@ -174,8 +270,8 @@ void setup() {
   WiFi.persistent(false); WiFi.mode(WIFI_AP_STA); WiFi.setAutoReconnect(false); WiFi.disconnect(false);
   apName = "Phantom-" + String(ESP.getChipId(), HEX);
   loadPassword();
-  bool ok = WiFi.softAP(apName.c_str(), apPassword.c_str(), 1, false, 2);
-  Serial.println(); Serial.println(F("Phantom OS 0.2.0"));
+  bool ok = WiFi.softAPConfig(AP_IP, AP_IP, IPAddress(255,255,255,0)) && WiFi.softAP(apName.c_str(), apPassword.c_str(), 1, false, 2);
+  Serial.println(); Serial.println(F("Phantom OS 0.3.0"));
   if (!ok) { Serial.println(F("AP start failed; check board and power.")); return; }
   Serial.print(F("Wi-Fi: ")); Serial.println(apName);
   Serial.print(F("Password: ")); Serial.println(apPassword);
@@ -183,6 +279,7 @@ void setup() {
   if (!fsReady) Serial.println(F("Key storage unavailable; password changes on restart. See README."));
   server.collectHeaders("X-Phantom-Request");
   server.on("/", HTTP_GET, []() {
+    if(!apRequest())return;
     server.sendHeader("Cache-Control", "no-store");
     server.sendHeader("X-Content-Type-Options", "nosniff");
     server.sendHeader("X-Frame-Options", "DENY");
@@ -192,12 +289,16 @@ void setup() {
   server.on("/api/status", HTTP_GET, handleStatus);
   server.on("/api/scan", HTTP_POST, handleScanStart);
   server.on("/api/scan", HTTP_GET, handleScanResults);
-  server.onNotFound([](){ sendJson(404, F("{\"error\":\"Not found\"}")); });
+  server.on("/api/link", HTTP_GET, handleLinkStatus);
+  server.on("/api/link/join", HTTP_POST, handleJoin);
+  server.on("/api/link/leave", HTTP_POST, handleLeave);
+  server.on("/api/link/dns", HTTP_POST, handleDns);
+  server.onNotFound([](){ if(apRequest())sendJson(404, F("{\"error\":\"Not found\"}")); });
   server.begin(); serverReady = true;
   minHeap = maxHeap = ESP.getFreeHeap();
 }
 void loop() {
-  if (serverReady) { server.handleClient(); updateScan(); }
+  if (serverReady) { server.handleClient(); updateScan(); updateLink(); }
   if (millis()-lastHeapSample >= 1000) {
     lastHeapSample = millis(); uint32_t h = ESP.getFreeHeap();
     if (h < minHeap) minHeap = h; if (h > maxHeap) maxHeap = h;

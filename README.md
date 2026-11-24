@@ -1,4 +1,4 @@
-# Phantom OS — ESP8266 edition v0.2.0
+# Phantom OS — ESP8266 edition v0.3.0
 
 An open-source, community-driven, original local-first Wi-Fi diagnostic toolkit for the NodeMCU ESP8266 (ESP-12E/F, typically 4 MB flash). This is an **alpha development release**, not a hardware-validated firmware. It is not Bruce, and does not emulate missing radio hardware.
 
@@ -7,8 +7,8 @@ An open-source, community-driven, original local-first Wi-Fi diagnostic toolkit 
 - WPA2-protected local access point, randomly generated 16-character key shown on USB serial. LittleFS stores the key if initialized.
 - On-demand 2.4 GHz Wi-Fi discovery, signal strength in dBm, advertised security, channel distribution, strongest 32 visible access points, local CSV export.
 - Hardware status (CPU, flash, heap, uptime, clients).
-- No router credentials, traffic capture, disruptive radio functions, remote server, analytics, or external dependencies at runtime. Network names remain on the board/phone unless the user exports them.
-- Browser-only optional snapshots (up to 10), JSON export, filtering and sorting, scan success/error counters, sampled heap range, and opt-in five-second local HTTP response monitoring. No Internet or LAN uplink diagnostics yet.
+- No persistent router credentials, traffic capture, disruptive radio functions, remote server, analytics, or external dependencies at runtime. Network names remain on the board/phone unless the user exports them.
+- Browser-only optional snapshots (up to 10), JSON export, filtering and sorting, scan success/error counters, sampled heap range, and opt-in five-second local HTTP response monitoring. Optional upstream connectivity diagnostics are now included.
 - A separate offline browser preview with labeled example data, and a GitHub Actions build workflow.
 
 ## Before flashing
@@ -40,7 +40,7 @@ On Android, connect to `Phantom-...`, enter the printed password, choose to stay
 ## Expected limits
 - ESP8266 is single-radio and cannot scan other channels while continuously serving its access point on its home channel. Scan may briefly interrupt the dashboard connection. The dashboard retries results for 30 seconds. Reconnect manually if needed. Cooldown: 15 seconds between scans.
 - Visible networks only. The 32 strongest reported entries are displayed. Channel counts cover up to 255 SDK entries, independently of the strongest-32 display cap; they are not RF spectrum measurements. Security labels are advertised by access points, not proof of security. Valid UTF-8 SSIDs are preserved; invalid bytes are escaped individually.
-- Browser communicates over HTTP on the private WPA2 AP; there is no independent application login or TLS. Only share the key with trusted devices. No router uplink is configured. Two clients maximum. This is a development prototype, not a security appliance.
+- Browser communicates over HTTP on the private WPA2 AP; there is no independent application login or TLS. Only share the key with trusted devices. No router uplink is configured by default; optional user-initiated station mode is available. Two clients maximum. This is a development prototype, not a security appliance.
 - BLE/NFC/IR/Sub-GHz/125 kHz RFID/USB HID are not implemented. The ESP8266 does not supply those physical interfaces by itself.
 
 ## Validation checklist (physical device, not yet performed)
@@ -52,7 +52,7 @@ On Android, connect to `Phantom-...`, enter the printed password, choose to stay
 - Run 10 scans with cooldown; confirm heap does not progressively fall or device reset.
 
 ## GitHub build
-The canonical project repository is https://github.com/pixelgig/PhantomOS (main). The Actions workflow is configured to run the dashboard smoke test and produce firmware and LittleFS binaries. No successful CI run is claimed until it actually completes.
+The canonical project repository is https://github.com/pixelgig/PhantomOS (main). The Actions workflow is configured to run the dashboard smoke test and produce firmware and LittleFS binaries. The corrected v0.2 build passed; v0.3 build and hardware status are tracked in VALIDATION.md.
 
 ## References
 - https://docs.platformio.org/en/latest/boards/espressif8266/nodemcuv2.html
@@ -72,3 +72,6 @@ Anyone can use, fork, modify and redistribute the original project under the [MI
 - [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md) · [CI results](https://github.com/pixelgig/PhantomOS/actions)
 
 This project is independent of Bruce and Flipper Devices. Temporary development coordination files will be retired before the first stable release; permanent public documentation is the source of truth.
+
+## Network toolkit (v0.3)
+Join the Phantom AP, enter your own 2.4 GHz network SSID and WPA passphrase (or blank for open), and select Connect. The board joins as a station without NAT or routing. It does not save station credentials to LittleFS or deliberately write them to flash; the SDK keeps them in RAM. The local dashboard uses HTTP inside the private WPA2 AP, not TLS; use only trusted clients. Disconnect or reboot to end the station session. The AP may change channel, so reconnect your phone if necessary. If the upstream subnet overlaps 192.168.4.0/24, the board disconnects. Check DNS resolves example.com on demand using the configured resolver (may be cached). Gateway address is DHCP information, not a reachability test. No ICMP ping or Internet speed test is implemented yet. See docs/NETWORK_TOOLKIT.md.

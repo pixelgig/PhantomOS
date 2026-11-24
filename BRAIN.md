@@ -11,7 +11,7 @@ Goal: a portable, zero-recurring-cost, local-first electronics/network diagnosti
 ## Milestones
 1. v0.1: source, preview, build and first hardware smoke test.
 2. v0.2: source implemented for scan/heap telemetry, UTF-8 SSID handling, phone-local snapshots, JSON export and opt-in dashboard monitor. Hardware validation pending; settings and uplink diagnostics deferred.
-3. v0.3: owner-network diagnostics; native Android companion planned for v0.5.
+3. v0.3: optional owner-network station mode, DHCP telemetry and explicit DNS lookup implemented; no routing, ping or speed test; hardware validation pending. Native Android companion planned for v0.5.
 4. v0.4: GPIO and UART tools for owner-controlled hardware, with safe pin selection.
 5. Later: optional ESP32-S3 port, hardware-dependent extensions, browser flasher only after verified binaries.
 

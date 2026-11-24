@@ -6,7 +6,7 @@ This is a direction, not a guarantee of features or dates. Current hardware targ
 | --- | --- | --- |
 | 0.1 | Local AP, dashboard, Wi-Fi discovery | Source implemented |
 | 0.2 | Filtering, telemetry, local snapshots and reports | Source implemented; validation pending |
-| 0.3 | Owner-network DNS, gateway and connectivity diagnostics | Planned |
+| 0.3 | Owner-network association, DHCP information and DNS diagnostics | Source implemented; validation pending |
 | 0.4 | Safe GPIO, UART, PWM and analog diagnostics | Planned |
 | 0.5 | Android companion; phone-supported BLE/NFC inspection and serial | Planned |
 | 0.6 | Configuration backup, update and migration tools | Planned |
