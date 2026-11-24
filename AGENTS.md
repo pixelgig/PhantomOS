@@ -32,3 +32,6 @@ Read BRAIN.md before work. Keep hardware facts separate from assumptions. Never 
 - Baseline `3a2ce9fa1993bc1f7c1d61add845b4b0d71c5ad9`. Historical CI is green.
 - Gate station code, bound scan serialization, separate timed-out scan recovery, add request deadlines and stage AP-key writes before replacement.
 - Continue with exact-commit firmware/filesystem evidence, device validation, and the remaining roadmap. See VALIDATION.md for results. Revert this branch's development commits independently if needed.
+
+- Added foreground-only monitoring with a 15-second interval and a shared status request, pinned CI actions, resource budgets and a package license inventory. Monitor mock verifies pausing and coalescing.
+- Added a read-only NodeMCU GPIO module, local API, sample UI and electrical acceptance notes. No pin reconfiguration or output code.

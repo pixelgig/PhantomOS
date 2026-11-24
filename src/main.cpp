@@ -4,6 +4,7 @@
 #include <ESP8266WebServer.h>
 #include <LittleFS.h>
 #include "dashboard.h"
+#include "electronics.h"
 
 namespace {
 constexpr char VERSION[] = "0.3.0";
@@ -202,9 +203,9 @@ void handleDisabledLink() {
 void handleCapabilities() {
   if (!apRequest()) return;
 #if PHANTOM_EXPERIMENTAL_STATION
-  sendJson(200, F("{\"schema\":1,\"wifiScan\":true,\"experimentalStation\":true}"));
+  sendJson(200, F("{\"schema\":1,\"wifiScan\":true,\"gpioRead\":true,\"experimentalStation\":true}"));
 #else
-  sendJson(200, F("{\"schema\":1,\"wifiScan\":true,\"experimentalStation\":false}"));
+  sendJson(200, F("{\"schema\":1,\"wifiScan\":true,\"gpioRead\":true,\"experimentalStation\":false}"));
 #endif
 }
 const char* encryption(uint8_t value) {
@@ -363,6 +364,15 @@ void setup() {
   server.on("/api/scan", HTTP_POST, handleScanStart);
   server.on("/api/scan", HTTP_GET, handleScanResults);
   server.on("/api/capabilities", HTTP_GET, handleCapabilities);
+  server.on("/api/electronics/status", HTTP_GET, []() {
+    if (!apRequest()) return;
+    const String inputs = electronics::readInputs();
+    if (inputs.isEmpty()) {
+      sendJson(503, F("{\"error\":\"Insufficient memory for GPIO response\"}"));
+      return;
+    }
+    sendJson(200, inputs);
+  });
   server.on("/api/link", HTTP_GET, handleLinkStatus);
 #if PHANTOM_EXPERIMENTAL_STATION
   server.on("/api/link/join", HTTP_POST, handleJoin);

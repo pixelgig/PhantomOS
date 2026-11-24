@@ -5,6 +5,9 @@
 - Compile station association and DNS out of the default profile and report feature availability through `/api/capabilities`.
 - Bound scan serialization, clear results on scan start, reject failed starts, and discard results from expired scans.
 - Add dashboard deadlines and mock live-response coverage.
+- Add a read-only GPIO prototype for five NodeMCU inputs.
+- Limit foreground monitoring to 15-second samples and coalesce overlapping status refreshes.
+- Pin CI actions and enforce flash, RAM and dashboard size limits.
 - Stage and read back AP key changes before replacing the active key.
 - Hold CI binary uploads while linked dependency distribution obligations are verified.
 

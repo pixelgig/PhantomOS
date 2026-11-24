@@ -10,6 +10,8 @@ vm.runInContext(js,ctx);
 
 async function testLiveRequests() {
   const nodes = new Map();
+  let intervalCallback;
+  let statusCalls = 0;
   const live = vm.createContext({
     location: {protocol: 'http:'},
     document: {
@@ -20,11 +22,18 @@ async function testLiveRequests() {
       createElement: element,
     },
     localStorage: {getItem: () => null},
+    setInterval(callback, delay) {
+      assert.equal(delay, 15000);
+      intervalCallback = callback;
+      return 1;
+    },
+    clearInterval() { intervalCallback = undefined; },
     AbortController,
     performance,
     setTimeout: callback => setTimeout(callback, 15),
     clearTimeout,
     fetch: async (path, {signal}) => {
+      if (path === '/api/status') ++statusCalls;
       if (path === '/stalled') {
         return {ok: true, json: () => new Promise((_, reject) => {
           signal.addEventListener('abort', () => reject(signal.reason), {once: true});
@@ -42,9 +51,29 @@ async function testLiveRequests() {
   assert.equal(nodes.get('joinKey').disabled, true);
   await assert.rejects(vm.runInContext("api('/error')", live), /Radio busy/);
   await assert.rejects(vm.runInContext("api('/stalled')", live), /Device request timed out/);
-  console.log('PASS: mocked live errors, stalled response deadline and disabled station controls');
+  await vm.runInContext('status()', live);
+  const baselineCalls = statusCalls;
+  vm.runInContext("$('monitor').onclick(); document.hidden = true;", live);
+  intervalCallback();
+  assert.equal(statusCalls, baselineCalls);
+  vm.runInContext('document.hidden = false;', live);
+  intervalCallback();
+  intervalCallback();
+  assert.equal(statusCalls, baselineCalls + 1);
+  await vm.runInContext('status()', live);
+  vm.runInContext("$('monitor').onclick()", live);
+  assert.equal(intervalCallback, undefined);
+  console.log('PASS: mocked live errors, request timeout, station gate and foreground monitor');
 }
 testLiveRequests().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});
+
+vm.runInContext("$('readPins').onclick()",ctx).then(() => {
+  assert.match(elements.get('pinLevels').textContent, /Sample · D1 \(GPIO 5\): HIGH/);
+  console.log('PASS: read-only GPIO preview is labeled sample data');
+}).catch(error => {
   console.error(error);
   process.exitCode = 1;
 });

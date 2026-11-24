@@ -31,3 +31,10 @@ The default build returns `state: "disabled"` for link status and HTTP 403 for l
 | POST | /api/link/dns | dns | Resolve example.com, max 1.5-second SDK timeout |
 
 Link states: disconnected, connecting, connected, timeout, lost, subnet_conflict. Connected fields: ssid, ip, gateway, subnet, dns, rssi, channel. DNS fields: hostname, resolved, elapsedMs, address (nullable). Join returns 202; leave and DNS return 200. Errors include 400 invalid parameters, 403 invalid header/host, 409 conflicting radio operation or disconnected, 429 cooldown, 503 low memory. All routes require destination/Host 192.168.4.1 (optional :80). No CORS. This is not authentication. No credentials are returned.
+
+## Read-only electronics prototype
+
+`GET /api/electronics/status` samples the NodeMCU profile's five allowed
+digital input levels. The response contains `schema: 1` and a `pins` array of
+`label`, `gpio` and `level` (0 or 1). Use only when `gpioRead` is true in
+capabilities. Physical validation is pending.
