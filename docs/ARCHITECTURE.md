@@ -12,13 +12,13 @@ Phantom OS is an offline-first toolkit targeting a 4 MB ESP8266 NodeMCU (Platfor
           |
     LittleFS /ap.key (credential persistence only)
 
-AP+STA mode permits scanning; there is no station uplink by default; optional explicit join is implemented in v0.3. setup() starts serial, loads or creates an AP key and registers routes. loop() services requests, polls scan completion and samples heap. Scan results are capped at the strongest 32 entries; channel totals use up to 255 SDK results. Cooldown is 15 seconds, and timeout reports an error without forcibly cancelling the SDK scan.
+AP+STA mode permits scanning; the default build excludes upstream association code. setup() starts serial, loads or creates an AP key and registers routes. loop() services requests, polls scan completion and samples heap. Scan results are capped at the strongest 32 entries; channel totals use up to 255 SDK results. Cooldown is 15 seconds, and timeout reports an error without forcibly cancelling the SDK scan.
 
 ## Storage and boundaries
 - Program flash: firmware and embedded HTML.
 - RAM: scan results, counters and system state; lost on restart.
 - LittleFS: AP key, provided filesystem is initialized; no automatic formatting.
-- Phone localStorage: optional diagnostic snapshots, not synced or uploaded.
+- Phone localStorage: optional diagnostic snapshots keyed by the device AP name and origin. Older snapshots remain separately exportable and can be cleared explicitly.
 - Trust boundary: private AP clients can access the HTTP API. There is no application login or TLS. No Internet routing or external telemetry is implemented. An explicit DNS diagnostic may query the configured upstream resolver. HTTP server binds to the AP address; hardware isolation tests remain pending.
 
 ## Extension principles

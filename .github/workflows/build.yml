@@ -7,23 +7,29 @@ permissions:
   contents: read
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
           python-version: '3.11'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: '22'
       - run: node tests/dashboard.test.cjs
+      - name: Test firmware JSON encoding on the host
+        run: |
+          g++ -std=c++11 -Wall -Wextra -Werror -Iinclude tests/json_escape.test.cpp -o /tmp/phantom-json-test
+          /tmp/phantom-json-test
       - run: python -m pip install platformio==6.1.18
-      - run: pio run -e nodemcuv2
+      - name: Compile and enforce budgets
+        shell: bash
+        run: |
+          pio run -e nodemcuv2 | tee build.log
+          python scripts/check_build_budget.py build.log
       - run: pio run -e nodemcuv2 -t buildfs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: phantom-os-esp8266
-          path: |
-            .pio/build/nodemcuv2/firmware.bin
-            .pio/build/nodemcuv2/littlefs.bin
-          if-no-files-found: error
+      - name: Record development image hashes and sizes
+        run: |
+          cd .pio/build/nodemcuv2
+          sha256sum firmware.bin littlefs.bin
+          wc -c firmware.bin littlefs.bin

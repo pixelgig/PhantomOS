@@ -1,6 +1,6 @@
-# Phantom OS — ESP8266 edition v0.3.0
+# Phantom OS for ESP8266
 
-An open-source, community-driven, original local-first Wi-Fi diagnostic toolkit for the NodeMCU ESP8266 (ESP-12E/F, typically 4 MB flash). This is an **alpha development release**, not a hardware-validated firmware. It is not Bruce, and does not emulate missing radio hardware.
+An open-source, community-driven, original local-first Wi-Fi diagnostic toolkit for the NodeMCU ESP8266 (ESP-12E/F, typically 4 MB flash). The firmware is an **alpha**. Physical board validation is pending.
 
 ## What is included
 - Embedded responsive dashboard, served from program flash, no Internet required after installation.
@@ -8,7 +8,8 @@ An open-source, community-driven, original local-first Wi-Fi diagnostic toolkit 
 - On-demand 2.4 GHz Wi-Fi discovery, signal strength in dBm, advertised security, channel distribution, strongest 32 visible access points, local CSV export.
 - Hardware status (CPU, flash, heap, uptime, clients).
 - No persistent router credentials, traffic capture, disruptive radio functions, remote server, analytics, or external dependencies at runtime. Network names remain on the board/phone unless the user exports them.
-- Browser-only optional snapshots (up to 10), JSON export, filtering and sorting, scan success/error counters, sampled heap range, and opt-in five-second local HTTP response monitoring. Optional upstream connectivity diagnostics are now included.
+- Browser-local snapshots (up to 10 per device), JSON and CSV export, filtering and sorting. The opt-in response monitor samples every 15 seconds while the dashboard is visible.
+- Read-only input levels for five NodeMCU GPIOs. Electrical verification is pending.
 - A separate offline browser preview with labeled example data, and a GitHub Actions build workflow.
 
 ## Before flashing
@@ -25,12 +26,19 @@ py -m platformio device list
 py -m platformio run -e nodemcuv2
 ```
 
-After confirming the board and COM port, replace `COM5` below with its actual port. Upload firmware. For persistent access point credentials, also initialize the bundled LittleFS filesystem **once**, if old filesystem contents can be overwritten.
+After confirming the board and COM port, replace `COM5` below with its actual port. Upload firmware and open the serial monitor.
 
 ```powershell
 py -m platformio run -e nodemcuv2 -t upload --upload-port COM5
-py -m platformio run -e nodemcuv2 -t uploadfs --upload-port COM5
 py -m platformio device monitor --port COM5 --baud 115200
+```
+
+For an identified board with an empty or backed-up filesystem, initialize
+LittleFS once to persist the AP key. This command replaces the filesystem.
+Close the serial monitor before running it and reopen it afterwards.
+
+```powershell
+py -m platformio run -e nodemcuv2 -t uploadfs --upload-port COM5
 ```
 
 Press the board's RST button after opening serial monitor. The board prints its network name, password and dashboard URL. Keep the password private. If LittleFS cannot mount (e.g. you skipped initialization), firmware uses a new temporary password every restart. No automatic formatting is done. For subsequent updates, upload firmware only to retain the key. Re-uploading the filesystem resets it.
@@ -38,9 +46,9 @@ Press the board's RST button after opening serial monitor. The board prints its 
 On Android, connect to `Phantom-...`, enter the printed password, choose to stay connected even if Android warns that the network has no Internet, and open **http://192.168.4.1** in the browser. If the serial monitor shows a different IP, use that instead. USB power may come from a charger or suitable power bank after flashing; USB OTG is not required.
 
 ## Expected limits
-- ESP8266 is single-radio and cannot scan other channels while continuously serving its access point on its home channel. Scan may briefly interrupt the dashboard connection. The dashboard retries results for 30 seconds. Reconnect manually if needed. Cooldown: 15 seconds between scans.
-- Visible networks only. The 32 strongest reported entries are displayed. Channel counts cover up to 255 SDK entries, independently of the strongest-32 display cap; they are not RF spectrum measurements. Security labels are advertised by access points, not proof of security. Valid UTF-8 SSIDs are preserved; invalid bytes are escaped individually.
-- Browser communicates over HTTP on the private WPA2 AP; there is no independent application login or TLS. Only share the key with trusted devices. No router uplink is configured by default; optional user-initiated station mode is available. Two clients maximum. This is a development prototype, not a security appliance.
+- ESP8266 is single-radio and cannot scan other channels while continuously serving its access point on its home channel. Scan may briefly interrupt the dashboard connection. Dashboard requests time out after four seconds. The scan poll has its own deadline. Reconnect manually if needed. Cooldown: 15 seconds between scans.
+- Visible networks only. The dashboard displays up to 32 of the strongest reported entries within an 8 KiB JSON array. Channel counts cover up to 255 SDK entries, independently of the strongest-32 display cap; they are not RF spectrum measurements. Security labels are advertised by access points, not proof of security. Valid UTF-8 SSIDs are preserved; invalid bytes are escaped individually.
+- Browser communicates over HTTP on the private WPA2 AP; there is no independent application login or TLS. Only share the key with trusted devices. No router uplink is configured by default; station tools are disabled in the default development build. Two clients maximum. This is a development prototype, not a security appliance.
 - BLE/NFC/IR/Sub-GHz/125 kHz RFID/USB HID are not implemented. The ESP8266 does not supply those physical interfaces by itself.
 
 ## Validation checklist (physical device, not yet performed)
@@ -51,8 +59,13 @@ On Android, connect to `Phantom-...`, enter the printed password, choose to stay
 - Restart after filesystem initialization preserves password; no external network joined.
 - Run 10 scans with cooldown; confirm heap does not progressively fall or device reset.
 
-## GitHub build
-The canonical project repository is https://github.com/pixelgig/PhantomOS (main). The Actions workflow is configured to run the dashboard smoke test and produce firmware and LittleFS binaries. The corrected v0.2 build passed; v0.3 build and hardware status are tracked in VALIDATION.md.
+## Source preview and builds
+
+Open `dashboard-preview.html` from a source download to run the offline
+sample dashboard. CI compiles the firmware and filesystem images and
+records their sizes and hashes. Binary uploads are held pending review
+of redistribution obligations. See [VALIDATION.md](VALIDATION.md) for exact
+commits, build results and physical test status.
 
 ## References
 - https://docs.platformio.org/en/latest/boards/espressif8266/nodemcuv2.html
@@ -60,7 +73,7 @@ The canonical project repository is https://github.com/pixelgig/PhantomOS (main)
 - https://arduino-esp8266.readthedocs.io/en/stable/filesystem.html
 
 ## Upgrade from v0.1
-Upload firmware only if LittleFS is already initialized; no filesystem migration is required. Do not use uploadfs for routine updates. Browser snapshots are stored on the phone, not in LittleFS, and may be shared by different devices using the same dashboard origin. Clear snapshots before handing over the phone or board. Monitoring is foreground-only; Android may throttle background tabs. Scan timeout reports an error but does not cancel the SDK operation; if it never completes, reboot the board.
+Upload firmware only if LittleFS is already initialized; no filesystem migration is required. Do not use uploadfs for routine updates. Browser snapshots are keyed by the device AP name. Earlier shared snapshots have separate export and deletion controls. Clear snapshots before handing over the phone or board. Monitoring is foreground-only; Android may throttle background tabs. Scan timeout reports an error but does not cancel the SDK operation; if it never completes, reboot the board.
 
 ## Open-source community
 
@@ -71,7 +84,7 @@ Anyone can use, fork, modify and redistribute the original project under the [MI
 - [Hardware compatibility](docs/HARDWARE.md) · [Testing](docs/TESTING.md) · [Release policy](docs/RELEASING.md)
 - [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md) · [CI results](https://github.com/pixelgig/PhantomOS/actions)
 
-This project is independent of Bruce and Flipper Devices. Temporary development coordination files will be retired before the first stable release; permanent public documentation is the source of truth.
+Temporary development coordination files will be retired before the first stable release; permanent public documentation is the source of truth.
 
 ## Network toolkit (v0.3)
-Join the Phantom AP, enter your own 2.4 GHz network SSID and WPA passphrase (or blank for open), and select Connect. The board joins as a station without NAT or routing. It does not save station credentials to LittleFS or deliberately write them to flash; the SDK keeps them in RAM. The local dashboard uses HTTP inside the private WPA2 AP, not TLS; use only trusted clients. Disconnect or reboot to end the station session. The AP may change channel, so reconnect your phone if necessary. If the upstream subnet overlaps 192.168.4.0/24, the board disconnects. Check DNS resolves example.com on demand using the configured resolver (may be cached). Gateway address is DHCP information, not a reachability test. No ICMP ping or Internet speed test is implemented yet. See docs/NETWORK_TOOLKIT.md.
+On controlled experimental builds only, join the Phantom AP, enter your own 2.4 GHz network SSID and WPA passphrase (or blank for open), and select Connect. The board joins as a station without NAT or routing. It does not save station credentials to LittleFS or deliberately write them to flash; the SDK keeps them in RAM. The local dashboard uses HTTP inside the private WPA2 AP, not TLS; use only trusted clients. Disconnect or reboot to end the station session. The AP may change channel, so reconnect your phone if necessary. If the upstream subnet overlaps 192.168.4.0/24, the board disconnects. Check DNS resolves example.com on demand using the configured resolver (may be cached). Gateway address is DHCP information, not a reachability test. No ICMP ping or Internet speed test is implemented yet. See docs/NETWORK_TOOLKIT.md.

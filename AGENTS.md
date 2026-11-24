@@ -26,3 +26,14 @@ Read BRAIN.md before work. Keep hardware facts separate from assumptions. Never 
 - Verified v0.2 corrected GitHub build passed (45348786422).
 - Added optional station association, disconnect, DHCP telemetry, DNS check with timeout/cooldown, AP-bound HTTP server and Host/destination guard, subnet conflict rejection, dashboard/demo and automated assertions. No intentional station credential persistence, NAT, ping or speed test.
 - Updated public docs, roadmap, changelog, validation. v0.3 CI and physical tests pending. Next: hardware isolation/connection testing; v0.4 electronics toolkit.
+
+## 2026-11-24 — Gate A development — Codex (GPT-6)
+
+- Baseline `3a2ce9fa1993bc1f7c1d61add845b4b0d71c5ad9`. Historical CI is green.
+- Gate station code, bound scan serialization, separate timed-out scan recovery, add request deadlines and stage AP-key writes before replacement.
+- Continue with exact-commit firmware/filesystem evidence, device validation, and the remaining roadmap. See VALIDATION.md for results. Revert this branch's development commits independently if needed.
+
+- Added foreground-only monitoring with a 15-second interval and a shared status request, pinned CI actions, resource budgets and a package license inventory. Monitor mock verifies pausing and coalescing.
+- Added a read-only NodeMCU GPIO module, local API, sample UI and electrical acceptance notes. No pin reconfiguration or output code.
+- Isolated browser snapshot storage by the AP identity, preserved legacy export and clear, and verified storage isolation and invalid data handling with Node VM tests.
+- Added a bounded native JSON encoder and host tests, separated destructive filesystem initialization from routine firmware upload in the README, and recorded Android scope and prerequisites.
