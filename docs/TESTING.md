@@ -34,3 +34,9 @@ For read-only GPIO, confirm the NodeMCU variant mapping and test each allowed
 pin with known 3.3 V-compatible logic levels on a verified board. Verify
 that reading leaves pin modes and outputs unchanged. Record wiring, board
 revision and results. Keep ADC, PWM, output and UART work gated.
+
+
+Switch between two owned Phantom boards with different AP names. Verify
+each opens its own history. Confirm earlier shared snapshots can be exported
+and cleared separately. Check that a browser at the same local address
+keeps the correct history after reconnecting and refreshing.

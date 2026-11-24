@@ -35,3 +35,4 @@ Read BRAIN.md before work. Keep hardware facts separate from assumptions. Never 
 
 - Added foreground-only monitoring with a 15-second interval and a shared status request, pinned CI actions, resource budgets and a package license inventory. Monitor mock verifies pausing and coalescing.
 - Added a read-only NodeMCU GPIO module, local API, sample UI and electrical acceptance notes. No pin reconfiguration or output code.
+- Isolated browser snapshot storage by the AP identity, preserved legacy export and clear, and verified storage isolation and invalid data handling with Node VM tests.

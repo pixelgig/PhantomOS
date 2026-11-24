@@ -18,7 +18,7 @@ AP+STA mode permits scanning; the default build excludes upstream association co
 - Program flash: firmware and embedded HTML.
 - RAM: scan results, counters and system state; lost on restart.
 - LittleFS: AP key, provided filesystem is initialized; no automatic formatting.
-- Phone localStorage: optional diagnostic snapshots, not synced or uploaded.
+- Phone localStorage: optional diagnostic snapshots keyed by the device AP name and origin. Older snapshots remain separately exportable and can be cleared explicitly.
 - Trust boundary: private AP clients can access the HTTP API. There is no application login or TLS. No Internet routing or external telemetry is implemented. An explicit DNS diagnostic may query the configured upstream resolver. HTTP server binds to the AP address; hardware isolation tests remain pending.
 
 ## Extension principles

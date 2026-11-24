@@ -41,3 +41,16 @@ compile-time resource gates and hashes images in CI without publishing them.
 Remaining release work includes hardware validation, HTTP input limits,
 completed linked dependency compliance review, configuration migration,
 the native Android companion, an installer and stable-release signoff.
+
+
+## Electronics and CI budget checkpoint
+
+[GitHub Actions 45353260720](https://github.com/pixelgig/PhantomOS/actions/runs/45353260720)
+passed for commit `b81aae36f0423a08be0f45ea9a8371c09305cfe6`. It compiled
+the read-only GPIO prototype and reported 29,928 / 81,920 bytes of static RAM
+and 360,835 / 1,044,464 bytes of sketch flash. CI passed the configured
+budgets. The board has yet to be tested.
+
+The LittleFS hash changed between the two CI runs although the `data/`
+sources were unchanged. Treat hashes as identifying individual builds
+until byte-for-byte reproducibility is verified.
