@@ -20,3 +20,7 @@ Use free/open tools; prefer no external services; do not expose device publicly;
 
 ## Public project policy
 The project is open to everyone under the MIT license for original code. ROADMAP.md and docs/ are the permanent public project records. Keep this file and AGENTS.md only during development; before v1.0 migrate remaining useful information and delete both from the active repository as required by docs/RELEASING.md. Do not rewrite Git history.
+
+## Standalone development checkpoint
+
+Gate A defaults to standalone Wi-Fi scanning. The schema-versioned capabilities route reports compiled support. Keep experimental station tooling gated pending request-parser and isolation review. License provenance and actual ESP8266 validation remain release gates.

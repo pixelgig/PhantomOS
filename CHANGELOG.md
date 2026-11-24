@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — standalone hardening
+
+- Compile station association and DNS out of the default profile and report feature availability through `/api/capabilities`.
+- Bound scan serialization, clear results on scan start, reject failed starts, and discard results from expired scans.
+- Add dashboard deadlines and mock live-response coverage.
+- Stage and read back AP key changes before replacing the active key.
+- Hold CI binary uploads while linked dependency distribution obligations are verified.
+
+
 Changes are recorded by version. Versions below 1.0 are development releases; interfaces may change.
 
 ## 0.3.0 — 2026-11-24

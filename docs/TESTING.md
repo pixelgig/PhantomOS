@@ -1,7 +1,7 @@
 # Testing and acceptance
 
 ## Automated checks
-Run node tests/dashboard.test.cjs, pio run -e nodemcuv2 and pio run -e nodemcuv2 -t buildfs. CI runs these commands and publishes build artifacts only if they pass. Compile success is not equivalent to hardware validation.
+Run node tests/dashboard.test.cjs, pio run -e nodemcuv2 and pio run -e nodemcuv2 -t buildfs. CI runs these commands and records image checksums in the job log. Binary upload is held pending license review. Compile success is not equivalent to hardware validation.
 
 ## Physical checklist
 Record firmware commit, board marking, flash size, phone/browser, date, power source and results.

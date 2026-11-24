@@ -16,7 +16,7 @@ On Windows use py -m platformio instead of pio if necessary. Build products resi
 - data/phantom.txt: marker for initial LittleFS image.
 - tests/dashboard.test.cjs: Node smoke tests using a simulated browser.
 - platformio.ini: target board and pinned platform.
-- .github/workflows/build.yml: tests, compile, filesystem build and artifact upload.
+- .github/workflows/build.yml: tests, firmware compilation, filesystem build and image checksums in the job log.
 
 ## Editing the dashboard
 Edit dashboard-preview.html first, then regenerate include/dashboard.h using:
