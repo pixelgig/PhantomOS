@@ -12,3 +12,7 @@ Read BRAIN.md before work. Keep hardware facts separate from assumptions. Never 
 - Added scan counters, duration and timeout reporting, sampled heap range, separate channel totals, valid UTF-8 preservation, and AP startup guard.
 - Added Wi-Fi filters/sorting, JSON export, optional browser-local snapshots, and local HTTP response monitoring. No uplink, disruptive radio capabilities or additional hardware required.
 - User prefers to defer physical testing until PC access is available. Firmware compile and hardware testing remain pending. See VALIDATION.md.
+
+## 2026-11-24 — Repository migration — ChatGPT (GPT-6.2)
+- Imported the complete v0.2.0 source into pixelgig/PhantomOS on main. Verified all 12 original Git blob hashes against the source archive.
+- Updated README to identify the canonical repository. No firmware behavior changed. GitHub Actions build not yet verified; physical validation remains pending.

@@ -52,7 +52,7 @@ On Android, connect to `Phantom-...`, enter the printed password, choose to stay
 - Run 10 scans with cooldown; confirm heap does not progressively fall or device reset.
 
 ## GitHub build
-Upload this folder to a new repository if desired. Actions workflow runs the dashboard smoke test and produces firmware and LittleFS binaries. No repository has been created or modified by this release. No CI run is claimed until it actually completes.
+The canonical project repository is https://github.com/pixelgig/PhantomOS (main). The Actions workflow is configured to run the dashboard smoke test and produce firmware and LittleFS binaries. No successful CI run is claimed until it actually completes.
 
 ## References
 - https://docs.platformio.org/en/latest/boards/espressif8266/nodemcuv2.html
