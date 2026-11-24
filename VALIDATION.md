@@ -54,3 +54,15 @@ budgets. The board has yet to be tested.
 The LittleFS hash changed between the two CI runs although the `data/`
 sources were unchanged. Treat hashes as identifying individual builds
 until byte-for-byte reproducibility is verified.
+
+## Host checks and known limits
+
+The native C++ JSON encoder test covers control characters, delimiters,
+valid UTF-8, malformed UTF-8, the maximum output expansion and over-limit
+input. Node VM tests verify the embedded dashboard and its mock flows.
+
+The pinned web server invokes route handlers after parsing request
+headers and eligible bodies. Its early hook runs after parsing the first
+request line. Route checks therefore cannot enforce a complete request
+size limit before SDK parsing. Keep the experimental station profile
+gated and validate a bounded HTTP design before release.

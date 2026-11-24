@@ -18,7 +18,7 @@ Scan fields: state (idle, scanning, ready, error), total, ageSeconds (nullable),
 
 Use the dashboard or a local HTTP client on an owned device. Do not poll aggressively. Dashboard requests time out after four seconds; scan polling uses a monotonic deadline; scan cooldown is enforced by firmware.
 
-Capability schema 1 reports `wifiScan` and `experimentalStation` as booleans. Feature flags indicate what was compiled; board validation is tracked separately in VALIDATION.md.
+Capability schema 1 reports `wifiScan`, `gpioRead` and `experimentalStation` as booleans. Feature flags indicate what was compiled; board validation is tracked separately in VALIDATION.md.
 
 ## Experimental network toolkit
 

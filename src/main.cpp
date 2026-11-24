@@ -5,6 +5,7 @@
 #include <LittleFS.h>
 #include "dashboard.h"
 #include "electronics.h"
+#include "json_escape.h"
 
 namespace {
 constexpr char VERSION[] = "0.3.0";
@@ -41,26 +42,9 @@ String linkState="disconnected";
 #endif
 
 String jsonString(const String& input) {
-  String out; if (!out.reserve(input.length() * 6 + 2)) return {}; out += '"';
-  const char hex[] = "0123456789abcdef";
-  for (unsigned int i = 0; i < input.length(); ++i) {
-    unsigned char c = input[i];
-    if (c == '"' || c == '\\') { out += '\\'; out += char(c); }
-    else if (c < 32 || c >= 127) { // preserve valid UTF-8; escape invalid individual bytes
-      if (c >= 0xc2 && c <= 0xf4) {
-        unsigned int len = c < 0xe0 ? 2 : c < 0xf0 ? 3 : 4;
-        bool valid = i + len <= input.length();
-        for (unsigned int j = 1; valid && j < len; ++j) {
-          unsigned char b = input[i+j];
-          valid = (b >= 0x80 && b <= 0xbf);
-          if (j == 1 && ((c == 0xe0 && b < 0xa0) || (c == 0xed && b > 0x9f) || (c == 0xf0 && b < 0x90) || (c == 0xf4 && b > 0x8f))) valid = false;
-        }
-        if (valid) { for (unsigned int j=0; j<len; ++j) out += input[i+j]; i += len-1; continue; }
-      }
-      out += F("\\u00"); out += hex[c >> 4]; out += hex[c & 15];
-    } else out += char(c);
-  }
-  out += '"'; return out;
+  char quoted[phantom::QUOTED_TEXT_CAPACITY];
+  if (!phantom::quoteJsonText(input.c_str(), input.length(), quoted)) return {};
+  return String(quoted);
 }
 String makePassword() {
   const char alphabet[] = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
@@ -246,7 +230,7 @@ void updateScan() {
     if (!entry.reserve(256)) {
       WiFi.scanDelete(); scanFailed = true; ++scanErrors; return;
     }
-    entry += F("{\"ssid\":"); const String ssid = jsonString(WiFi.SSID(index).substring(0, 32));
+    entry += F("{\"ssid\":"); const String ssid = jsonString(WiFi.SSID(index));
     if (ssid.isEmpty()) {
       WiFi.scanDelete(); scanFailed = true; ++scanErrors; return;
     }
