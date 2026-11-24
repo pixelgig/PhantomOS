@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a reproducible problem
+title: "[Bug]: "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Firmware version or commit
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Board, flash size, phone/browser or build environment
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use an owned or authorized test environment.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual results
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs
+      description: Never include passwords, private SSIDs or identifying information.

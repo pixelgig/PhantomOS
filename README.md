@@ -1,6 +1,6 @@
 # Phantom OS — ESP8266 edition v0.2.0
 
-An original local-first Wi-Fi diagnostic toolkit for the NodeMCU ESP8266 (ESP-12E/F, typically 4 MB flash). This is an initial **source release**, not an already-compiled or hardware-validated firmware. It is not Bruce, and does not emulate missing radio hardware.
+An open-source, community-driven, original local-first Wi-Fi diagnostic toolkit for the NodeMCU ESP8266 (ESP-12E/F, typically 4 MB flash). This is an **alpha development release**, not a hardware-validated firmware. It is not Bruce, and does not emulate missing radio hardware.
 
 ## What is included
 - Embedded responsive dashboard, served from program flash, no Internet required after installation.
@@ -61,3 +61,14 @@ The canonical project repository is https://github.com/pixelgig/PhantomOS (main)
 
 ## Upgrade from v0.1
 Upload firmware only if LittleFS is already initialized; no filesystem migration is required. Do not use uploadfs for routine updates. Browser snapshots are stored on the phone, not in LittleFS, and may be shared by different devices using the same dashboard origin. Clear snapshots before handing over the phone or board. Monitoring is foreground-only; Android may throttle background tabs. Scan timeout reports an error but does not cancel the SDK operation; if it never completes, reboot the board.
+
+## Open-source community
+
+Anyone can use, fork, modify and redistribute the original project under the [MIT license](LICENSE). Dependencies have their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md). Contributions, bug reports and documentation improvements are welcome.
+
+- [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md)
+- [Architecture](docs/ARCHITECTURE.md) · [API reference](docs/API.md) · [Developer setup](docs/DEVELOPMENT.md)
+- [Hardware compatibility](docs/HARDWARE.md) · [Testing](docs/TESTING.md) · [Release policy](docs/RELEASING.md)
+- [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md) · [CI results](https://github.com/pixelgig/PhantomOS/actions)
+
+This project is independent of Bruce and Flipper Devices. Temporary development coordination files will be retired before the first stable release; permanent public documentation is the source of truth.

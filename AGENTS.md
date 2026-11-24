@@ -16,3 +16,8 @@ Read BRAIN.md before work. Keep hardware facts separate from assumptions. Never 
 ## 2026-11-24 — Repository migration — ChatGPT (GPT-6.2)
 - Imported the complete v0.2.0 source into pixelgig/PhantomOS on main. Verified all 12 original Git blob hashes against the source archive.
 - Updated README to identify the canonical repository. No firmware behavior changed. GitHub Actions build not yet verified; physical validation remains pending.
+
+## 2026-11-24 — Public project preparation — ChatGPT (GPT-6.2)
+- Added MIT license, public contribution and security policies, issue/PR templates, architecture, API, hardware, development, testing and release docs, roadmap, changelog and dashboard generator.
+- Public source is for everyone; temporary BRAIN.md and AGENTS.md must be removed before stable v1.0 after migration into public docs. Git history is retained.
+- Initial CI dashboard test passed; firmware compilation failed because the variadic header registration overload misinterpreted the array/count arguments. Changed to single-header overload; new CI result pending. Hardware remains untested.

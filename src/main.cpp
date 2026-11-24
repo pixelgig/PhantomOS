@@ -181,7 +181,7 @@ void setup() {
   Serial.print(F("Password: ")); Serial.println(apPassword);
   Serial.print(F("Dashboard: http://")); Serial.println(WiFi.softAPIP());
   if (!fsReady) Serial.println(F("Key storage unavailable; password changes on restart. See README."));
-  static const char* headers[] = {"X-Phantom-Request"}; server.collectHeaders(headers, 1);
+  server.collectHeaders("X-Phantom-Request");
   server.on("/", HTTP_GET, []() {
     server.sendHeader("Cache-Control", "no-store");
     server.sendHeader("X-Content-Type-Options", "nosniff");

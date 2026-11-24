@@ -1,0 +1,17 @@
+# Changelog
+
+Changes are recorded by version. Versions below 1.0 are development releases; interfaces may change.
+
+## Unreleased
+- Public contribution, architecture, API, testing, hardware, security and release documentation.
+- MIT license for original project files; dependency licenses remain separate.
+- Correct ESP8266WebServer header registration for the pinned ESP8266 core (CI verification pending at time of change).
+
+## 0.2.0 — 2026-11-24
+- Scan duration, error counters, heap sampling, channel totals and UTF-8 handling.
+- Dashboard filtering, sorting, optional local snapshots, JSON export and response-time monitor.
+- Dashboard tests passed in GitHub Actions; initial firmware compilation failed at header registration. Physical validation pending.
+
+## 0.1.0 — 2026-11-24
+- Initial firmware, local access point, Wi-Fi discovery, device status and CSV export.
+- Embedded dashboard, offline preview, PlatformIO setup and build workflow.
